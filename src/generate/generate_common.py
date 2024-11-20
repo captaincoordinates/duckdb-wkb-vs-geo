@@ -2,7 +2,7 @@ from typing import Dict, Final, List
 from random import uniform
 from shapely.geometry import Polygon
 from shapely.wkt import dumps as wkt_dump
-from os import path
+from os import path, environ
 from json import dump, load
 
 _x_min: Final[float] = -180
@@ -13,7 +13,7 @@ _y_max: Final[float] = 90
 _minimum_span: Final[float] = 0.1
 _maximum_span: Final[float] = 10
 
-_feature_count: Final[int] = 10
+_feature_count: Final[int] = int(environ["DDB_BENCH_FEAT_COUNT"])
 _feature_report_interval: Final[int] = max(round(_feature_count / 100), 1)
 
 sql_setup: Final[str] = """
