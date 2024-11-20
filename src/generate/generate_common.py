@@ -1,5 +1,5 @@
-from json import dump, load
 from os import environ, path
+from pickle import dump, load
 from random import uniform
 from typing import Dict, Final
 
@@ -32,10 +32,12 @@ intersect_test_wkt: Final[str] = (
 
 def get_inserts() -> Dict[int, str]:
     cache_path = path.join(
-        path.dirname(__file__), ".cache", f"inserts_{_feature_count}.json"
+        path.dirname(__file__), ".cache", f"inserts_{_feature_count}.pkl"
     )
     if not path.exists(cache_path):
         inserts_dict: Dict[int, str] = {}
+        # Could utilise parallelism for better performance, but probably not
+        # worth the effort as will likely only run once.
         for i in range(_feature_count):
             if i % _feature_report_interval == 0:
                 print(f"generating feature {i + 1} of {_feature_count}")
@@ -55,7 +57,7 @@ def get_inserts() -> Dict[int, str]:
             inserts_dict[i] = (
                 f"INSERT INTO features (id, feature) VALUES (?, ST_GeomFromText('{wkt_dump(feature)}'))"
             )
-        with open(cache_path, "w") as f:
+        with open(cache_path, "wb") as f:
             dump(inserts_dict, f)
-    with open(cache_path, "r") as f:
+    with open(cache_path, "rb") as f:
         return load(f)
