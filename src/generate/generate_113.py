@@ -4,8 +4,10 @@ from generate_common import get_inserts, intersect_test_wkt, sql_setup
 connection = connect()
 connection.execute(sql_setup)
 
-for id, sql in get_inserts().items():
-    connection.execute(sql, [id])
+for id, parts in get_inserts().items():
+    sql = parts[0]
+    parameters = parts[1]
+    connection.execute(sql, parameters)
 
 connection.execute(
     "COPY (SELECT * FROM features) TO '/output/features-113.parquet' (FORMAT PARQUET)"
