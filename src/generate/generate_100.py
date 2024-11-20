@@ -1,8 +1,7 @@
 from generate_common import sql_setup, get_inserts, intersect_test_wkt
-from typing import Final
-from duckdb import connect, DuckDBPyConnection
+from duckdb import connect
 
-connection: Final[DuckDBPyConnection] = connect()
+connection = connect()
 connection.execute(sql_setup)
 
 for id, sql in get_inserts().items():

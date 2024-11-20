@@ -5,5 +5,4 @@ COPY src/requirements_113.txt /requirements.txt
 RUN pip install -r /requirements_common.txt
 RUN pip install -r /requirements.txt
 
-COPY src/generate/generate_common.py /app/
-COPY src/generate/generate_113.py /app/generate.py
+COPY src/benchmark/benchmark.py /app/benchmark.py

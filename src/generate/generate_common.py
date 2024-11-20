@@ -17,14 +17,14 @@ _feature_count: Final[int] = 10
 _feature_report_interval: Final[int] = max(round(_feature_count / 100), 1)
 
 sql_setup: Final[str] = """
-    INSTALL SPATIAL;
-    LOAD SPATIAL;
+    INSTALL spatial;
+    LOAD spatial;
     CREATE TABLE features(
         id INT PRIMARY KEY,
         feature GEOMETRY NOT NULL   
     );                  
 """
-intersect_test_wkt = "POLYGON ((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
+intersect_test_wkt: Final[str] = "POLYGON ((-180 -90, 180 -90, 180 90, -180 90, -180 -90))"
 
 def get_inserts() -> Dict[int, str]:
     cache_path = path.join(path.dirname(__file__), ".cache", f"inserts_{_feature_count}.json")
