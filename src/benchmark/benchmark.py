@@ -68,26 +68,55 @@ shapes = {
 }
 
 times: Dict[str, Dict[str, float]] = {
-    "100": {},
-    "113": {},
+    "100-bbox": {},
+    "113-geo": {},
+    "113-bbox": {},
 }
 for name, shape in shapes.items():
     wkt = wkt_dump(shape)
 
     start_100 = time()
-    connection.execute(f"""
+    connection.execute(
+        f"""
         SELECT id
           FROM '{parquet_100_path}'
-         WHERE ST_Intersects(ST_GeomFromWKB(feature), ST_GeomFromText('{wkt}'))               
-    """)
-    times["100"][name] = round(time() - start_100, timing_precision)
+         WHERE 
+           NOT (
+                   x_max < ?
+                OR y_max < ?
+                OR x_min > ?
+                OR y_min > ?
+              )
+           AND ST_Intersects(ST_GeomFromWKB(feature), ST_GeomFromText('{wkt}'))               
+        """,
+        *shape.bounds,
+    )
+    times["100-bbox"][name] = round(time() - start_100, timing_precision)
 
-    start_113 = time()
+    start_113_geo = time()
     connection.execute(f"""
         SELECT id
           FROM '{parquet_113_path}'
          WHERE ST_Intersects(feature, ST_GeomFromText('{wkt}'))     
     """)
-    times["113"][name] = round(time() - start_113, timing_precision)
+    times["113-geo"][name] = round(time() - start_113_geo, timing_precision)
+
+    start_113_bbox = time()
+    connection.execute(
+        f"""
+        SELECT id
+          FROM '{parquet_113_path}'
+         WHERE 
+           NOT (
+                   x_max < ?
+                OR y_max < ?
+                OR x_min > ?
+                OR y_min > ?
+               )
+           AND ST_Intersects(feature, ST_GeomFromText('{wkt}'))     
+        """,
+        *shape.bounds,
+    )
+    times["113-bbox"][name] = round(time() - start_113_bbox, timing_precision)
 
 print(dumps(times, indent=2))
