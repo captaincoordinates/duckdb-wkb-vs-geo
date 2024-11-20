@@ -1,0 +1,10 @@
+[project]
+name = "DuckDB WKB vs Geometry"
+version = "0.1.0"
+requires-python = ">=3.12"
+
+[tool.isort]
+profile = "black"
+
+[tool.ruff.format]
+quote-style = "double"
