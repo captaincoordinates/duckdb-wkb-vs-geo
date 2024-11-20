@@ -76,9 +76,9 @@ for name, shape in shapes.items():
     wkt = wkt_dump(shape)
 
     start_100 = time()
-    connection.execute(
+    count_100 = connection.execute(
         f"""
-        SELECT id
+        SELECT COUNT(*)
           FROM '{parquet_100_path}'
          WHERE 
            NOT (
@@ -89,22 +89,22 @@ for name, shape in shapes.items():
               )
            AND ST_Intersects(ST_GeomFromWKB(feature), ST_GeomFromText('{wkt}'))               
         """,
-        *shape.bounds,
-    )
+        shape.bounds,
+    ).fetchall()[0][0]
     times["100-bbox"][name] = round(time() - start_100, timing_precision)
 
     start_113_geo = time()
-    connection.execute(f"""
-        SELECT id
+    count_113_geo = connection.execute(f"""
+        SELECT COUNT(*)
           FROM '{parquet_113_path}'
          WHERE ST_Intersects(feature, ST_GeomFromText('{wkt}'))     
-    """)
+    """).fetchall()[0][0]
     times["113-geo"][name] = round(time() - start_113_geo, timing_precision)
 
     start_113_bbox = time()
-    connection.execute(
+    count_113_bbox = connection.execute(
         f"""
-        SELECT id
+        SELECT COUNT(*)
           FROM '{parquet_113_path}'
          WHERE 
            NOT (
@@ -115,8 +115,12 @@ for name, shape in shapes.items():
                )
            AND ST_Intersects(feature, ST_GeomFromText('{wkt}'))     
         """,
-        *shape.bounds,
-    )
+        shape.bounds,
+    ).fetchall()[0][0]
     times["113-bbox"][name] = round(time() - start_113_bbox, timing_precision)
+
+    assert (
+        count_100 == count_113_geo == count_113_bbox
+    ), f"result count discrepancy in {name}. 100: {count_100}, 113-geo: {count_113_geo}, 113-bbox: {count_113_bbox}"
 
 print(dumps(times, indent=2))
