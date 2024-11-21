@@ -9,6 +9,9 @@ for id, parts in get_inserts().items():
     parameters = parts[1]
     connection.execute(sql, parameters)
 
+# currently unclear if this will make any difference when data are stored in and queried from Parquet
+connection.execute("CREATE INDEX feature_idx ON features USING RTREE (feature)")
+
 connection.execute(
     "COPY (SELECT * FROM features) TO '/output/features-113.parquet' (FORMAT PARQUET)"
 )
