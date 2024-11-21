@@ -14,5 +14,6 @@ docker build \
 docker run \
     --rm \
     -v $PWD/output:/parquet:ro \
+    -e DDB_BENCH_PATH_PREFIX \
     $image_name \
     python /app/benchmark.py
